@@ -213,7 +213,7 @@ function liveCalc(){
 function clearForm(){
  editingId=null;formTitle.textContent="📝 New Record";saveBtn.textContent="Save Record";cancelEditBtn.classList.add("hidden");
  date.value=today();line.value="WSL1";shift.value="Day";supplier.value="";
- ["operators","total","failed","nocheck","remarks","otherReason"].forEach(id=>document.getElementById(id).value="");
+ ["total","failed","nocheck","remarks","otherReason"].forEach(id=>document.getElementById(id).value="");
  selectedReasons=[];otherReasonBox.classList.add("hidden");buildChips();liveCalc()
 }
 function cancelEdit(){clearForm()}
@@ -225,7 +225,7 @@ function saveRecord(){
  let p=t-f-n,checked=p+f,rate=checked?p/checked*100:0;
  let finalReasons=[...selectedReasons];
  if(finalReasons.includes("Other")&&otherReason.value.trim())finalReasons=finalReasons.map(x=>x==="Other"?"Other: "+otherReason.value.trim():x);
- let rec={id:editingId||Date.now(),date:date.value,line:line.value,shift:shift.value,supplier:supplierName,operators:Number(operators.value||0),total:t,failed:f,nocheck:n,pass:p,rate,reasons:finalReasons,remarks:remarks.value.trim()};
+ let rec={id:editingId||Date.now(),date:date.value,line:line.value,shift:shift.value,supplier:supplierName,total:t,failed:f,nocheck:n,pass:p,rate,reasons:finalReasons,remarks:remarks.value.trim()};
  let d=records();
  if(editingId){d=d.map(x=>x.id===editingId?rec:x)}else{d.push(rec)}
  setRecords(d);clearForm();renderAll();alert(editingId?"Record updated.":"Record saved.")
@@ -233,7 +233,7 @@ function saveRecord(){
 function editRecord(id){
  let r=records().find(x=>x.id===id); if(!r)return;
  editingId=id;formTitle.textContent="✏️ Edit Record";saveBtn.textContent="Update Record";cancelEditBtn.classList.remove("hidden");
- date.value=r.date;line.value=r.line;shift.value=r.shift;supplier.value=r.supplier;operators.value=r.operators||"";total.value=r.total;failed.value=r.failed;nocheck.value=r.nocheck;remarks.value=r.remarks||"";
+ date.value=r.date;line.value=r.line;shift.value=r.shift;supplier.value=r.supplier;total.value=r.total;failed.value=r.failed;nocheck.value=r.nocheck;remarks.value=r.remarks||"";
  selectedReasons=(r.reasons||[]).map(x=>x.startsWith("Other:")?"Other":x);
  buildChips(r.reasons||[]);
  let other=(r.reasons||[]).find(x=>x.startsWith("Other:"));
@@ -296,7 +296,7 @@ buildChips();liveCalc();renderAll();
 function exportBackup(){
  const payload={
   app:"Washing Line Passing Rate Report",
-  version:"v15",
+  version:"v16",
   exportedAt:new Date().toISOString(),
   localStorageKey:RECORD_KEY,
   records:records()
