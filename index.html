@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Washing Line Passing Rate Report</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#f7f2e8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="WSL Report">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#f7f2e8;--paper:#fffdf7;--soft:#fff8e8;--line:#dfcda9;--ink:#3f2f20;--muted:#826b4f;--brown:#b97932;--brown2:#8b5a24;--green:#6faa57;--yellow:#d9a73f;--red:#d95d4f;--shadow:0 8px 24px rgba(78,55,26,.08)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+body{background:radial-gradient(circle at top left,rgba(255,230,170,.7),transparent 32%),linear-gradient(180deg,#fbf5e9,var(--bg))}
+.app{max-width:1180px;margin:auto;padding:16px}
+.header{background:linear-gradient(180deg,#fffef9,#f4e7cd);border:1.5px solid var(--line);border-radius:24px;padding:16px;box-shadow:var(--shadow);position:sticky;top:8px;z-index:10}
+h1{font-size:25px;margin:0}.subtitle{color:var(--muted);font-size:14px;margin-top:4px}
+.tabs{display:flex;gap:10px;margin-top:14px;overflow-x:auto}
+.tab{border:1.5px solid var(--line);background:var(--paper);color:var(--ink);padding:11px 15px;border-radius:999px;font-weight:800;white-space:nowrap;cursor:pointer}
+.tab.active{background:var(--brown);color:white;border-color:var(--brown)}
+.page{display:none;padding-top:16px}.page.active{display:block}
+.card{background:rgba(255,253,247,.96);border:1.5px solid var(--line);border-radius:22px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+.kpiGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.kpi{background:linear-gradient(180deg,#fffefb,#fff7e5);border:1.5px solid var(--line);border-radius:20px;padding:14px;min-width:0}
+.kpi .label{color:var(--muted);font-size:13px;font-weight:800}.kpi .value{font-size:28px;font-weight:900;margin-top:8px;color:var(--brown2);word-break:break-word}
+.kpi.good .value{color:var(--green)}.kpi.warn .value{color:var(--yellow)}.kpi.bad .value{color:var(--red)}
+.formGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.field{background:var(--soft);border:1.5px solid var(--line);border-radius:18px;padding:12px;min-width:0;overflow:hidden}
+.compactFilter{display:grid;grid-template-columns:1.1fr 1.4fr .9fr .9fr;gap:8px;align-items:end}
+.compactField{background:transparent;border:0;padding:0;min-width:0}.compactField label{font-size:12px;margin-bottom:4px}.compactField input,.compactField select{padding:9px 10px;font-size:15px;border-radius:12px}
+label{display:block;font-size:13px;font-weight:800;color:var(--muted);margin-bottom:6px}
+input,select,textarea{width:100%;max-width:100%;min-width:0;border:0;background:white;border-radius:12px;padding:12px;font-size:17px;color:var(--ink);outline:1px solid #eadcbc}
+textarea{min-height:86px;resize:vertical}.full{grid-column:1/-1}
+.resultBox{display:grid;grid-template-columns:1fr 1fr;gap:10px}.resultItem{background:white;border:1.5px solid var(--line);border-radius:16px;padding:13px}.resultItem b{font-size:24px;color:var(--brown2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:10px 14px;border-radius:999px;border:1.5px solid var(--line);background:white;cursor:pointer;font-weight:800}.chip.active{background:var(--green);border-color:var(--green);color:white}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}button{border:0;border-radius:14px;padding:13px 18px;background:var(--brown);color:white;font-weight:900;font-size:16px;cursor:pointer}
+button.secondary{background:#9f8a6b}button.danger{background:var(--red)}button.edit{background:var(--green);padding:8px 12px;font-size:14px}.hidden{display:none}
+.tableWrap{overflow-x:auto;border:1.5px solid var(--line);border-radius:18px;background:white}
+table{border-collapse:collapse;width:100%;min-width:1080px}th,td{padding:10px;border-bottom:1px solid #eadcbc;text-align:left;white-space:nowrap;font-size:14px}th{background:#f1e3c8;color:#6b4c2a}
+.rankLine,.manageSupplier{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #eadcbc}.rankLine:last-child,.manageSupplier:last-child{border-bottom:0}
+.badge{padding:5px 9px;border-radius:999px;background:#f1e3c8;font-weight:900}.smallText{font-size:13px;color:var(--muted);line-height:1.4}
+@media (orientation:landscape) and (min-width:900px){.recordLayout{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:start}}
+@media(max-width:900px){.kpiGrid{grid-template-columns:repeat(2,1fr)}.formGrid,.compactFilter{grid-template-columns:1fr}.resultBox{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+<h1>🍁 Washing Line Passing Rate Report</h1>
+<div class="subtitle">WSL1 / WSL2 · iPad landscape friendly · Local saved data</div>
+<div class="tabs">
+<button class="tab active" onclick="showPage('dashboard',this)">🏠 Dashboard</button>
+<button class="tab" onclick="openNewRecordTab(this)">📝 New Record</button>
+<button class="tab" onclick="showPage('records',this)">📚 Records</button>
+<button class="tab" onclick="showPage('analysis',this)">📊 Analysis</button>
+<button class="tab" onclick="showPage('settings',this)">⚙️ Suppliers</button>
+</div>
+</div>
+
+<section id="dashboard" class="page active">
+<div class="card"><div class="compactFilter">
+<div class="compactField"><label>Month</label><select id="filterMonth" onchange="renderAll()"></select></div>
+<div class="compactField"><label>Supplier</label><select id="filterSupplier" onchange="renderAll()"><option value="">All Suppliers</option></select></div>
+<div class="compactField"><label>Washing Line</label><select id="filterLine" onchange="renderAll()"><option value="">All Lines</option><option>WSL1</option><option>WSL2</option></select></div>
+<div class="compactField"><label>Shift</label><select id="filterShift" onchange="renderAll()"><option value="">All Shifts</option><option>Day</option><option>Night</option></select></div>
+</div></div>
+<div class="kpiGrid">
+<div class="kpi" id="kOverall"><div class="label">Overall Pass Rate</div><div class="value" id="overallRate">0%</div></div>
+<div class="kpi" id="kWsl1"><div class="label">WSL1</div><div class="value" id="wsl1Rate">0%</div></div>
+<div class="kpi" id="kWsl2"><div class="label">WSL2</div><div class="value" id="wsl2Rate">0%</div></div>
+<div class="kpi" id="kDay"><div class="label">Day Shift</div><div class="value" id="dayRate">0%</div></div>
+<div class="kpi" id="kNight"><div class="label">Night Shift</div><div class="value" id="nightRate">0%</div></div>
+</div>
+<div class="kpiGrid" style="margin-top:12px">
+<div class="kpi"><div class="label">Total Bags</div><div class="value" id="totalBags">0</div></div>
+<div class="kpi"><div class="label">QC Failed</div><div class="value" id="failedBags">0</div></div>
+<div class="kpi"><div class="label">QC Not Checked</div><div class="value" id="noCheckBags">0</div></div>
+<div class="kpi"><div class="label">Pass Bags</div><div class="value" id="passBags">0</div></div>
+<div class="kpi"><div class="label">Records</div><div class="value" id="recordCount">0</div></div>
+</div>
+</section>
+
+<section id="record" class="page">
+<div class="recordLayout">
+<div class="card">
+<h2 style="margin-top:0" id="formTitle">📝 New Record</h2>
+<div class="formGrid">
+<div class="field dateField"><label>📅 Date</label><input id="date" type="date"></div>
+<div class="field"><label>🏭 Washing Line</label><select id="line"><option>WSL1</option><option>WSL2</option></select></div>
+<div class="field"><label>🌞 Shift</label><select id="shift"><option>Day</option><option>Night</option></select></div>
+<div class="field"><label>🏢 Supplier</label><input id="supplier" placeholder="Type supplier name freely"></div>
+<div class="field"><label>👷 No. of Operators</label><input id="operators" type="number" inputmode="numeric"></div>
+<div class="field"><label>📦 Total Bags</label><input id="total" type="number" inputmode="numeric" oninput="liveCalc()"></div>
+<div class="field"><label>❌ QC Failed Bags</label><input id="failed" type="number" inputmode="numeric" oninput="liveCalc()"></div>
+<div class="field"><label>⚪ QC Not Checked Bags</label><input id="nocheck" type="number" inputmode="numeric" oninput="liveCalc()"></div>
+<div class="field full"><label>Failure Reasons</label><div class="chips" id="chips"></div></div>
+<div class="field full hidden" id="otherReasonBox"><label>Other Failure Reason</label><input id="otherReason" placeholder="Type other reason"></div>
+<div class="field full"><label>Remarks</label><textarea id="remarks" placeholder="Optional note"></textarea></div>
+</div>
+<div class="actions">
+<button id="saveBtn" onclick="saveRecord()">Save Record</button>
+<button class="secondary" onclick="clearForm()">Clear Form</button>
+<button id="cancelEditBtn" class="danger hidden" onclick="cancelEdit()">Cancel Edit</button>
+</div>
+</div>
+<div class="card">
+<h2 style="margin-top:0">Live Result</h2>
+<div class="resultBox"><div class="resultItem"><label>Pass Bags</label><b id="livePass">0</b></div><div class="resultItem"><label>Passing Rate</label><b id="liveRate">0%</b></div></div>
+<p class="smallText">Pass Bags = Total - QC Failed - QC Not Checked.<br>Passing Rate = Pass ÷ (Pass + QC Failed).</p>
+</div>
+</div>
+</section>
+
+<section id="records" class="page">
+<div class="card">
+<h2 style="margin-top:0">📚 Records</h2>
+<div class="compactFilter" style="margin-bottom:12px">
+<div class="compactField"><label>Month</label><select id="recordMonth" onchange="renderAll()"></select></div>
+<div class="compactField"><label>Supplier</label><select id="recordSupplier" onchange="renderAll()"><option value="">All Suppliers</option></select></div>
+<div class="compactField"><label>Washing Line</label><select id="recordLine" onchange="renderAll()"><option value="">All Lines</option><option>WSL1</option><option>WSL2</option></select></div>
+<div class="compactField"><label>Shift</label><select id="recordShift" onchange="renderAll()"><option value="">All Shifts</option><option>Day</option><option>Night</option></select></div>
+</div>
+<div class="tableWrap">
+<table><thead><tr><th>Date</th><th>Line</th><th>Shift</th><th>Supplier</th><th>Total</th><th>Fail</th><th>No Check</th><th>Pass</th><th>Rate</th><th>Reason</th><th>Edit</th><th>Delete</th></tr></thead><tbody id="recordsTable"></tbody></table>
+</div>
+</div>
+</section>
+
+<section id="analysis" class="page">
+<div class="formGrid">
+<div class="card"><h2 style="margin-top:0">🏆 Supplier Ranking</h2><div id="supplierRank"></div></div>
+<div class="card"><h2 style="margin-top:0">🏭 WSL + Shift</h2><div id="comboRank"></div></div>
+<div class="card"><h2 style="margin-top:0">🔎 Failure Reasons</h2><div id="reasonRank"></div></div>
+<div class="card"><h2 style="margin-top:0">🌞 Day vs Night</h2><div id="shiftRank"></div></div>
+</div>
+</section>
+
+<section id="settings" class="page">
+<div class="card">
+<h2 style="margin-top:0">⚙️ Suppliers</h2>
+<p class="smallText">Supplier list is detected from saved records and used as dropdown filters in Dashboard and Records.</p>
+<div id="supplierManage"></div>
+<hr style="border:none;border-top:1px solid #eadcbc;margin:18px 0">
+<h3>Backup / Restore</h3>
+<p class="smallText">Export your local iPad data as a backup file. Save it into iCloud Drive manually. Import it later to restore.</p>
+<div class="actions">
+<button onclick="exportBackup()">Export Backup</button>
+<label style="display:inline-block;background:#9f8a6b;color:white;border-radius:14px;padding:13px 18px;font-weight:900;cursor:pointer">
+Import Backup
+<input type="file" accept=".json,application/json" onchange="importBackup(event)" style="display:none">
+</label>
+</div>
+</div>
+</section>
+</div>
+
+<script>
+const RECORD_KEY="wlpr_v8_records"; // keep same key so existing V8 data remains
+const reasons=["PVC","Metal","Label","Moisture","Color","Contamination","Other"];
+let selectedReasons=[];
+let editingId=null;
+
+function today(){return new Date().toISOString().slice(0,10)}
+function monthNow(){return new Date().toISOString().slice(0,7)}
+date.value=today();
+
+function showPage(id,btn){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.getElementById(id).classList.add("active");btn.classList.add("active");renderAll()}
+function openNewRecordTab(btn){clearForm();showPage("record",btn)}
+function goPage(id){let btn=[...document.querySelectorAll(".tab")].find(b=>b.getAttribute("onclick").includes("'"+id+"'"));showPage(id,btn)}
+function records(){return JSON.parse(localStorage.getItem(RECORD_KEY)||"[]")}
+function setRecords(d){localStorage.setItem(RECORD_KEY,JSON.stringify(d))}
+function fmtRate(n){return (Math.round(n*100)/100).toFixed(2)+"%"}
+function groupRate(arr){let p=0,f=0;arr.forEach(r=>{p+=Number(r.pass||0);f+=Number(r.failed||0)});return(p+f)?p/(p+f)*100:0}
+function rateClass(rate){if(rate>=98)return"good";if(rate>=95)return"warn";return"bad"}
+function setKpiClass(id,rate){let el=document.getElementById(id);el.classList.remove("good","warn","bad");if(rate>0)el.classList.add(rateClass(rate))}
+function supplierList(){return [...new Set(records().map(r=>r.supplier).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
+function filterData(mode){
+ let m=mode==="record"?recordMonth.value:filterMonth.value;
+ let s=mode==="record"?recordSupplier.value:filterSupplier.value;
+ let l=mode==="record"?recordLine.value:filterLine.value;
+ let sh=mode==="record"?recordShift.value:filterShift.value;
+ return records().filter(r=>(!m||r.date.startsWith(m))&&(!s||r.supplier===s)&&(!l||r.line===l)&&(!sh||r.shift===sh))
+}
+function fillSupplierDropdown(id){
+ let el=document.getElementById(id),cur=el.value,sup=supplierList();
+ el.innerHTML='<option value="">All Suppliers</option>'+sup.map(s=>`<option value="${s}">${s}</option>`).join("");
+ el.value=sup.includes(cur)?cur:"";
+}
+
+function buildChips(active=[]){
+ chips.innerHTML="";
+ reasons.forEach(reason=>{
+  let c=document.createElement("span");c.className="chip";c.textContent=reason;
+  if(active.some(x=>x===reason||x.startsWith("Other:"))&&reason==="Other")c.classList.add("active");
+  if(active.includes(reason))c.classList.add("active");
+  c.onclick=()=>{
+   c.classList.toggle("active");
+   if(selectedReasons.includes(reason))selectedReasons=selectedReasons.filter(x=>x!==reason);else selectedReasons.push(reason);
+   otherReasonBox.classList.toggle("hidden",!selectedReasons.includes("Other"));
+  };
+  chips.appendChild(c);
+ });
+}
+
+function liveCalc(){
+ let t=Number(total.value||0),f=Number(failed.value||0),n=Number(nocheck.value||0);
+ let p=Math.max(0,t-f-n),checked=p+f,rate=checked?p/checked*100:0;
+ livePass.textContent=p;liveRate.textContent=fmtRate(rate)
+}
+function clearForm(){
+ editingId=null;formTitle.textContent="📝 New Record";saveBtn.textContent="Save Record";cancelEditBtn.classList.add("hidden");
+ date.value=today();line.value="WSL1";shift.value="Day";supplier.value="";
+ ["operators","total","failed","nocheck","remarks","otherReason"].forEach(id=>document.getElementById(id).value="");
+ selectedReasons=[];otherReasonBox.classList.add("hidden");buildChips();liveCalc()
+}
+function cancelEdit(){clearForm()}
+
+function saveRecord(){
+ let supplierName=supplier.value.trim();
+ let t=Number(total.value||0),f=Number(failed.value||0),n=Number(nocheck.value||0);
+ if(!date.value||!supplierName||t<=0||f<0||n<0||f+n>t){alert("Please check input. Supplier is required, total must be more than 0, and failed + not checked cannot exceed total.");return}
+ let p=t-f-n,checked=p+f,rate=checked?p/checked*100:0;
+ let finalReasons=[...selectedReasons];
+ if(finalReasons.includes("Other")&&otherReason.value.trim())finalReasons=finalReasons.map(x=>x==="Other"?"Other: "+otherReason.value.trim():x);
+ let rec={id:editingId||Date.now(),date:date.value,line:line.value,shift:shift.value,supplier:supplierName,operators:Number(operators.value||0),total:t,failed:f,nocheck:n,pass:p,rate,reasons:finalReasons,remarks:remarks.value.trim()};
+ let d=records();
+ if(editingId){d=d.map(x=>x.id===editingId?rec:x)}else{d.push(rec)}
+ setRecords(d);clearForm();renderAll();alert(editingId?"Record updated.":"Record saved.")
+}
+function editRecord(id){
+ let r=records().find(x=>x.id===id); if(!r)return;
+ editingId=id;formTitle.textContent="✏️ Edit Record";saveBtn.textContent="Update Record";cancelEditBtn.classList.remove("hidden");
+ date.value=r.date;line.value=r.line;shift.value=r.shift;supplier.value=r.supplier;operators.value=r.operators||"";total.value=r.total;failed.value=r.failed;nocheck.value=r.nocheck;remarks.value=r.remarks||"";
+ selectedReasons=(r.reasons||[]).map(x=>x.startsWith("Other:")?"Other":x);
+ buildChips(r.reasons||[]);
+ let other=(r.reasons||[]).find(x=>x.startsWith("Other:"));
+ if(other){otherReasonBox.classList.remove("hidden");otherReason.value=other.replace("Other: ","")}
+ else{otherReasonBox.classList.toggle("hidden",!selectedReasons.includes("Other"))}
+ liveCalc();goPage("record");
+}
+function deleteRecord(id){if(confirm("Delete this record?")){setRecords(records().filter(r=>r.id!==id));renderAll()}}
+function deleteSupplierRecords(name){if(confirm("Delete all records for supplier: "+name+" ?")){setRecords(records().filter(r=>r.supplier!==name));renderAll()}}
+
+function monthLabel(value){
+ const parts=value.split("-");
+ const d=new Date(Number(parts[0]), Number(parts[1])-1, 1);
+ return d.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+}
+function getMonthOptions(){
+ let set=new Set(records().map(r=>String(r.date||"").slice(0,7)).filter(Boolean));
+ set.add(monthNow());
+ return [...set].sort().reverse();
+}
+function fillMonthSelect(id){
+ let el=document.getElementById(id),cur=el.value||monthNow();
+ let opts=getMonthOptions();
+ el.innerHTML=opts.map(m=>`<option value="${m}">${monthLabel(m)}</option>`).join("");
+ el.value=opts.includes(cur)?cur:monthNow();
+}
+
+function renderSuppliers(){
+ fillSupplierDropdown("filterSupplier");fillSupplierDropdown("recordSupplier");
+ let sup=supplierList();
+ supplierManage.innerHTML=sup.length?sup.map(s=>`<div class="manageSupplier"><b>${s}</b><button class="danger" onclick="deleteSupplierRecords('${String(s).replaceAll("'","\\'")}')">Delete Supplier Records</button></div>`).join(""):"<p class='smallText'>No supplier saved yet.</p>";
+}
+function renderDashboard(data){
+ let overall=groupRate(data),wsl1=groupRate(data.filter(r=>r.line==="WSL1")),wsl2=groupRate(data.filter(r=>r.line==="WSL2")),day=groupRate(data.filter(r=>r.shift==="Day")),night=groupRate(data.filter(r=>r.shift==="Night"));
+ overallRate.textContent=fmtRate(overall);wsl1Rate.textContent=fmtRate(wsl1);wsl2Rate.textContent=fmtRate(wsl2);dayRate.textContent=fmtRate(day);nightRate.textContent=fmtRate(night);
+ setKpiClass("kOverall",overall);setKpiClass("kWsl1",wsl1);setKpiClass("kWsl2",wsl2);setKpiClass("kDay",day);setKpiClass("kNight",night);
+ totalBags.textContent=data.reduce((a,b)=>a+Number(b.total||0),0);failedBags.textContent=data.reduce((a,b)=>a+Number(b.failed||0),0);noCheckBags.textContent=data.reduce((a,b)=>a+Number(b.nocheck||0),0);passBags.textContent=data.reduce((a,b)=>a+Number(b.pass||0),0);recordCount.textContent=data.length
+}
+function renderRecords(data){
+ recordsTable.innerHTML=data.length?data.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(r=>`<tr><td>${r.date}</td><td>${r.line}</td><td>${r.shift}</td><td>${r.supplier}</td><td>${r.total}</td><td>${r.failed}</td><td>${r.nocheck}</td><td>${r.pass}</td><td><span class="badge">${fmtRate(r.rate)}</span></td><td>${(r.reasons||[]).join(", ")||"-"}</td><td><button class="edit" onclick="editRecord(${r.id})">Edit</button></td><td><button class="danger" onclick="deleteRecord(${r.id})">Delete</button></td></tr>`).join(""):`<tr><td colspan="12">No records yet.</td></tr>`
+}
+function renderRank(id,map,empty){
+ let rows=Object.entries(map).map(([name,v])=>{let rate=(v.pass+v.fail)?v.pass/(v.pass+v.fail)*100:0;return{name,rate,total:v.total||0,fail:v.fail||0}}).sort((a,b)=>b.rate-a.rate);
+ document.getElementById(id).innerHTML=rows.length?rows.map(r=>`<div class="rankLine"><span><b>${r.name}</b><br><small class="smallText">Total ${r.total} · Fail ${r.fail}</small></span><span class="badge">${fmtRate(r.rate)}</span></div>`).join(""):`<p class="smallText">${empty}</p>`
+}
+function renderAnalysis(data){
+ let supplierMap={},comboMap={"WSL1 Day":{pass:0,fail:0,total:0},"WSL1 Night":{pass:0,fail:0,total:0},"WSL2 Day":{pass:0,fail:0,total:0},"WSL2 Night":{pass:0,fail:0,total:0}},shiftMap={"Day":{pass:0,fail:0,total:0},"Night":{pass:0,fail:0,total:0}},reasonCount={};
+ data.forEach(r=>{
+  if(r.supplier){supplierMap[r.supplier]??={pass:0,fail:0,total:0};supplierMap[r.supplier].pass+=r.pass;supplierMap[r.supplier].fail+=r.failed;supplierMap[r.supplier].total+=r.total}
+  let combo=`${r.line} ${r.shift}`;comboMap[combo].pass+=r.pass;comboMap[combo].fail+=r.failed;comboMap[combo].total+=r.total;
+  shiftMap[r.shift].pass+=r.pass;shiftMap[r.shift].fail+=r.failed;shiftMap[r.shift].total+=r.total;
+  (r.reasons||[]).forEach(reason=>reasonCount[reason]=(reasonCount[reason]||0)+1)
+ });
+ renderRank("supplierRank",supplierMap,"No supplier data.");renderRank("comboRank",comboMap,"No WSL data.");renderRank("shiftRank",shiftMap,"No shift data.");
+ reasonRank.innerHTML=Object.entries(reasonCount).sort((a,b)=>b[1]-a[1]).map(([r,c])=>`<div class="rankLine"><b>${r}</b><span class="badge">${c}</span></div>`).join("")||"<p class='smallText'>No failure reason selected yet.</p>"
+}
+function renderAll(){fillMonthSelect("filterMonth");fillMonthSelect("recordMonth");renderSuppliers();let dashData=filterData("dash");renderDashboard(dashData);renderRecords(filterData("record"));renderAnalysis(dashData)}
+buildChips();liveCalc();renderAll();
+
+function exportBackup(){
+ const payload={
+  app:"Washing Line Passing Rate Report",
+  version:"v15",
+  exportedAt:new Date().toISOString(),
+  localStorageKey:RECORD_KEY,
+  records:records()
+ };
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;
+ a.download="wsl_passing_rate_backup_"+new Date().toISOString().slice(0,10)+".json";
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+ URL.revokeObjectURL(url);
+ alert("Backup file created. Save it to iCloud Drive if prompted.");
+}
+
+function importBackup(event){
+ const file=event.target.files[0];
+ if(!file)return;
+ const reader=new FileReader();
+ reader.onload=function(){
+  try{
+   const data=JSON.parse(reader.result);
+   const imported=Array.isArray(data)?data:(data.records||[]);
+   if(!Array.isArray(imported))throw new Error("Invalid backup format");
+   if(!confirm("Import backup and replace current records?"))return;
+   setRecords(imported);
+   renderAll();
+   alert("Backup imported successfully.");
+  }catch(e){
+   alert("Import failed. Please select a valid backup JSON file.");
+  }
+ };
+ reader.readAsText(file);
+}
+
+if("serviceWorker" in navigator){
+ window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js"));
+}
+
+</script>
+</body>
+</html>

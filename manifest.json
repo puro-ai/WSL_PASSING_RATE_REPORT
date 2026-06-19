@@ -1,0 +1,23 @@
+{
+  "name": "Washing Line Passing Rate Report",
+  "short_name": "WSL Report",
+  "description": "Local washing line passing rate report for WSL1 and WSL2.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#f7f2e8",
+  "theme_color": "#f7f2e8",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
